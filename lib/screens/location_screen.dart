@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:weather_app/screens/city_screen.dart';
 import 'package:weather_app/services/weather.dart';
 import 'package:weather_app/utilities/constants.dart';
+import 'package:weather_app/utilities/rounded_button.dart';
 
 class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key, this.locationWeather});
@@ -45,6 +46,26 @@ class _LocationScreenState extends State<LocationScreen> {
     });
   }
 
+  void getCurrentLocation() async {
+    var weatherData = await weather.getLocationWeather();
+    updateUI(weatherData);
+  }
+
+  void getSearchLocation() async {
+    var typedCityName = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const CityScreen();
+        },
+      ),
+    );
+    if (typedCityName != null) {
+      var weatherData = await weather.getCustomLocationWeather(typedCityName);
+      updateUI(weatherData);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,56 +102,26 @@ class _LocationScreenState extends State<LocationScreen> {
               ),
               const SizedBox(height: 5),
               Text(
+                // ignore: unnecessary_string_interpolations
                 '$city',
                 textAlign: TextAlign.center,
                 style: kMessageTextStyle,
               ),
-              const SizedBox(height: 160),
+              const SizedBox(height: 170),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: 43,
-                    width: 135,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15))),
-                        onPressed: () async {
-                          var weatherData = await weather.getLocationWeather();
-                          updateUI(weatherData);
-                        },
-                        child: const Text("Here")),
+                  CustomRoundedButton(
+                    buttonLabel: kHereLabel,
+                    funcOnPress: getCurrentLocation,
+                    backGroundColor: Colors.grey,
                   ),
                   const SizedBox(width: 20),
-                  SizedBox(
-                    width: 135,
-                    height: 43,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            elevation: 1,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15))),
-                        onPressed: () async {
-                          var typedCityName = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return const CityScreen();
-                              },
-                            ),
-                          );
-                          if (typedCityName != null) {
-                            var weatherData = await weather
-                                .getCustomLocationWeather(typedCityName);
-                            updateUI(weatherData);
-                          }
-                        },
-                        child: const Text("Search")),
-                  ),
+                  CustomRoundedButton(
+                    buttonLabel: kSearchLabel,
+                    funcOnPress: getSearchLocation,
+                    backGroundColor: Colors.black,
+                  )
                 ],
               )
             ],
